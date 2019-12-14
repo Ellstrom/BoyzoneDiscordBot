@@ -40,8 +40,6 @@ bot.on('message', message=>{
     console.log("userName="+userName);   
 
     if(message.content === "HELLO" ){
-
-
         //Reacts to the message written
         message.react(getCustomEmoji(message, userName_ellstrom44));
 
@@ -69,17 +67,23 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
         
         //Use for test
         //membersInChannels.push("Test Testsson");
-        //numberOfMembersInVoiceChannels++;
+        //numberOfMembersInVoiceChannels++;        
 
         for (const [channelID, channel] of voiceChannels) {
-            numberOfMembersInVoiceChannels += channel.members.size;
             for (const [memberID, member] of channel.members) {
-                console.log("userName="+member.user.username);
-                membersInChannels.push(member.user.username);
+                
+                if(member.selfMute){
+                    console.log("Muted User="+member.user.username);
+                }else{
+                    console.log("Not Muted User="+member.user.username);
+                    membersInChannels.push(member.user.username);
+                    numberOfMembersInVoiceChannels++;
+                }
+                
             }
         }
 
-        var messageToSend = "A user joined a voice channel! Users in channels ("+numberOfMembersInVoiceChannels+") = ";
+        var messageToSend = "A user joined a voice channel! Unmuted users in channels ("+numberOfMembersInVoiceChannels+") = ";
 
         console.log("number of users in voice channels= "+numberOfMembersInVoiceChannels);
 
@@ -88,7 +92,7 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
             numTimesInLoop++;
             console.log("user in channel= "+userName);
 
-            if(numTimesInLoop == numberOfMembersInVoiceChannels){
+            if((numTimesInLoop == numberOfMembersInVoiceChannels) && (numberOfMembersInVoiceChannels != 1)){
                 messageToSend += ' and ';
             }else if(numTimesInLoop != 1){
                 messageToSend += ', ';
