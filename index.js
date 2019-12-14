@@ -90,6 +90,10 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
             messageToSend += userName;
         }
         messageToSend += '.';
+
+        if(numberOfMembersInVoiceChannels == 5){
+            messageToSend += ' TIME FOR CSGO!!??';
+        }
         
         console.log("messageToSend= "+messageToSend);
 
