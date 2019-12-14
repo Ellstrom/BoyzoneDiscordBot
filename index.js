@@ -32,19 +32,25 @@ bot.on('ready', () =>{
 
 //If a message is written
 bot.on('message', message=>{
+
+    //Retreives the username of the author of the message
+    var userName = message.author.username;
+
+    //Logs the userName for debugging
+    console.log("userName="+userName);   
+
     if(message.content === "HELLO" ){
 
-        //Retreives the username of the author of the message
-        var userName = message.author.username;
-
-        //Logs the userName for debugging
-        console.log("userName="+userName);
 
         //Reacts to the message written
         message.react(getCustomEmoji(message, userName_ellstrom44));
 
         //Replies to the message written
         message.reply('HELLO '+userName+' '+getCustomEmoji(message, userName));
+    } else if(message.content === "MemeMachine"){
+        message.react(getCustomEmojiBasedOnEmojiName(message, 'ck_Genius'));
+
+        message.reply(getCustomEmoji(message, '5253_BonesDancer') +'www.bit.ly/3231YVs' +getCustomEmoji(message, '5253_BonesDancer'));
     }
 })
 
@@ -129,3 +135,7 @@ function getCustomEmoji(message, userName){
     }
 }
 
+//Returns emoji based on input emojiName
+function getCustomEmojiBasedOnEmojiName(message, emojiName){
+    return message.guild.emojis.find(emoji => emoji.name === emojiName);
+}
