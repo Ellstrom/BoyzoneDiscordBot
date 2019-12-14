@@ -114,6 +114,7 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
         async function clear() {
             const fetched = await notificationChannel.fetchMessages({limit: 99});
             notificationChannel.bulkDelete(fetched);
+            console.log("cleared notificationChannel");
         }
         clear();
 
