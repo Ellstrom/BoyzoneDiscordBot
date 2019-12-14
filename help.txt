@@ -1,0 +1,8 @@
+run this command in git bash:
+cmd "/C installation.bat"
+
+get the file token.txt and put in same directory as where BoyzoneDiscordBot is.
+
+then try 
+node .
+
