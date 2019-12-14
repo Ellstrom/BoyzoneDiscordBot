@@ -109,6 +109,14 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
 
         var channelName = 'notifications';
         const notificationChannel = newMember.guild.channels.find('name', channelName)
+
+        //Clear previous messages
+        async function clear() {
+            const fetched = await notificationChannel.fetchMessages({limit: 99});
+            notificationChannel.bulkDelete(fetched);
+        }
+        clear();
+
         notificationChannel.send(messageToSend)
 
     } else if(newUserChannel === undefined){
