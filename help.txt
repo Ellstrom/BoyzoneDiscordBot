@@ -1,7 +1,11 @@
-run this command in git bash:
-cmd "/C installation.bat"
+run this command:
+npm install
 
 get the file token.txt and put in same directory as where BoyzoneDiscordBot is.
+So file structure example:
+DiscordBot
+----BoyzoneDiscordBot
+----token.txt
 
 then try 
 node .
