@@ -112,7 +112,7 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
 function getCustomEmoji(message, userName){
     //Assign user to emoji
     if(userName == userName_ellstrom44){
-        return message.guild.emojis.find(emoji => emoji.name === 'ck_Diarrhea');
+        return message.guild.emojis.find(emoji => emoji.name === 'Ellstrm_agent');
     }else if(userName == userName_Anders13254){
         return message.guild.emojis.find(emoji => emoji.name === 'Klint_glad');
     }else if(userName == userName_Peakman){
