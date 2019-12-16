@@ -6,6 +6,8 @@ const bot = new Discord.Client();
 var fs = require("fs");
 const token = fs.readFileSync("./../token.txt").toString();
 
+const snekfetch = require('snekfetch');
+
 /* 
 Useful Links:
     Youtube Guide: https://www.youtube.com/watch?v=X_qg0Ut9nU8
@@ -47,8 +49,32 @@ bot.on('message', message=>{
         message.reply('HELLO '+userName+' '+getCustomEmoji(message, userName));
     } else if(message.content === "MemeMachine"){
         message.react(getCustomEmojiBasedOnEmojiName(message, 'ck_Genius'));
+        message.reply(getCustomEmoji(message, '5253_BonesDancer') + getCustomEmoji(message, '5253_BonesDancer'));
 
-        message.reply(getCustomEmoji(message, '5253_BonesDancer') +'www.bit.ly/3231YVs' +getCustomEmoji(message, '5253_BonesDancer'));
+        async function memeGenerator(message){
+            console.log("INSUIIDE SNEKBOIZ");
+            try {
+                const { body } = await snekfetch
+                    .get('https://www.reddit.com/r/dankmemes.json?sort=top&t=week')
+                    .query({ limit: 800 });
+                const allowed = message.channel.nsfw ? body.data.children : body.data.children.filter(post => !post.data.over_18);
+                if (!allowed.length) return message.channel.send('It seems we are out of fresh memes!, Try again later.');
+                const randomnumber = Math.floor(Math.random() * allowed.length)
+                const embed = new Discord.RichEmbed()
+                .setColor(0x00A2E8)
+                .setTitle(allowed[randomnumber].data.title)
+                .setDescription("Posted by: " + allowed[randomnumber].data.author)
+                .setImage(allowed[randomnumber].data.url)
+                .addField("Other info:", "Up votes: " + allowed[randomnumber].data.ups + " / Comments: " + allowed[randomnumber].data.num_comments)
+                .setFooter("Memes provided by r/dankmemes")
+                message.channel.send(embed)
+            } catch (err) {
+                return console.log(err);
+            }
+        }
+
+        memeGenerator(message);
+
     }
 })
 
@@ -110,9 +136,10 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
         var channelName = 'notifications';
         const notificationChannel = newMember.guild.channels.find('name', channelName)
 
-        //Clear previous messages
+        //Clear previous messages //https://stackoverflow.com/questions/41574971/how-does-bulkdelete-work
         async function clear() {
             const fetched = await notificationChannel.fetchMessages({limit: 99});
+            console.log("fetched="+fetched);
             notificationChannel.bulkDelete(fetched);
             console.log("cleared notificationChannel");
         }
