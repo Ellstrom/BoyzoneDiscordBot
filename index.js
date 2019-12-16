@@ -52,12 +52,17 @@ bot.on('message', message=>{
         message.reply(getCustomEmoji(message, '5253_BonesDancer') + getCustomEmoji(message, '5253_BonesDancer'));
 
         async function memeGenerator(message){
-            console.log("INSUIIDE SNEKBOIZ");
+            console.log("INSUIIDE SNEKBOIZ1");
             try {
+                console.log("INSUIIDE SNEKBOIZ2");
                 const { body } = await snekfetch
                     .get('https://www.reddit.com/r/dankmemes.json?sort=top&t=week')
-                    .query({ limit: 800 });
+                    .query({ limit: 50 });
+                console.log("INSUIIDE SNEKBOIZ3");
                 const allowed = message.channel.nsfw ? body.data.children : body.data.children.filter(post => !post.data.over_18);
+                
+                console.log("allowed.length="+allowed.length);
+
                 if (!allowed.length) return message.channel.send('It seems we are out of fresh memes!, Try again later.');
                 const randomnumber = Math.floor(Math.random() * allowed.length)
                 const embed = new Discord.RichEmbed()
