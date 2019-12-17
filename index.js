@@ -21,6 +21,7 @@ const userName_Peakman = 'Peakman';
 const userName_Valacka = 'Valacka';
 const userName_huto29 = 'huto29';
 const userName_Lazy_Shyguy = 'Lazy_Shyguy';
+const userName_Fabars = 'Fabars';
 
 console.log("token="+token);
 
@@ -47,15 +48,15 @@ bot.on('message', message=>{
 
         //Replies to the message written
         message.reply('HELLO '+userName+' '+getCustomEmoji(message, userName));
-    } else if(message.content === "MemeMachine"){
+    } else if(message.content === "meme me"){
         message.react(getCustomEmojiBasedOnEmojiName(message, 'ck_Genius'));
-        message.reply(getCustomEmoji(message, '5253_BonesDancer') + getCustomEmoji(message, '5253_BonesDancer'));
+        message.reply(getCustomEmoji(message, '5253_BonesDancer') + getCustomEmoji(message, '5253_BonesDancer')+ getCustomEmoji(message, '5253_BonesDancer'));
 
         async function memeGenerator(message){
             try {
                 const { body } = await snekfetch
-                    .get('https://www.reddit.com/r/dankmemes.json?sort=top&t=week')
-                    .query({ limit: 50 });
+                    .get('https://www.reddit.com/r/comedyheaven+dankmemes+okbuddyretard.json?sort=top&t=week')
+                    .query({ limit: 75 });
                 const allowed = message.channel.nsfw ? body.data.children : body.data.children.filter(post => !post.data.over_18);
                 
                 if (!allowed.length) return message.channel.send('It seems we are out of fresh memes!, Try again later.');
@@ -66,7 +67,7 @@ bot.on('message', message=>{
                 .setDescription("Posted by: " + allowed[randomnumber].data.author)
                 .setImage(allowed[randomnumber].data.url)
                 .addField("Other info:", "Up votes: " + allowed[randomnumber].data.ups + " / Comments: " + allowed[randomnumber].data.num_comments)
-                .setFooter("Memes provided by r/dankmemes")
+                .setFooter("Episka memes från Reddit")
                 message.channel.send(embed)
             } catch (err) {
                 return console.log(err);
@@ -169,6 +170,8 @@ function getCustomEmoji(message, userName){
         return message.guild.emojis.find(emoji => emoji.name === 'Hugo_antifa');
     }else if (userName == userName_Lazy_Shyguy){
         return message.guild.emojis.find(emoji => emoji.name === 'Ludvig_pinsamt');
+    }else if (userName == userName_Fabars){
+        return message.guild.emojis.find(emoji => emoji.name === 'Pedro_fuhrer');    
     }else{
         //Default case, no userName match
         return message.guild.emojis.find(emoji => emoji.name === '5253_BonesDancer');
