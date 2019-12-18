@@ -35,6 +35,7 @@ bot.on('ready', () =>{
 
 //If a message is written
 bot.on('message', message=>{
+    console.log("-------------------------------");
 
     //Retreives the username of the author of the message
     var userName = message.author.username;
@@ -80,7 +81,7 @@ bot.on('message', message=>{
 })
 
 bot.on('voiceStateUpdate', (oldMember, newMember) =>{
-
+    console.log("-------------------------------");
     var oldUserChannel = oldMember.voiceChannel;
     var newUserChannel = newMember.voiceChannel;
 
@@ -88,7 +89,6 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
         //User joins a voice channel
         console.log("A user joined a voice channel!");
 
-        const voiceChannels = newMember.guild.channels.filter(channel => channel.type === 'voice');
         var membersInChannels = []; 
         var numberOfMembersInVoiceChannels = 0;
         
@@ -96,17 +96,19 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
         //membersInChannels.push("Test Testsson");
         //numberOfMembersInVoiceChannels++;        
 
-        for (const [channelID, channel] of voiceChannels) {
+        for (const [channelID, channel] of getAllVoiceChannels(newMember)) {
             for (const [memberID, member] of channel.members) {
-                
-                if(member.selfMute){
-                    console.log("Muted User="+member.user.username);
+                if(member.user.username != 'Groovy'){
+                    if(member.selfMute){
+                        console.log("Muted User="+member.user.username);
+                    }else{
+                        console.log("Not Muted User="+member.user.username);
+                        membersInChannels.push(member.user.username);
+                        numberOfMembersInVoiceChannels++;
+                    }
                 }else{
-                    console.log("Not Muted User="+member.user.username);
-                    membersInChannels.push(member.user.username);
-                    numberOfMembersInVoiceChannels++;
+                    console.log("Groovy is a bot, ignore.");
                 }
-                
             }
         }
 
@@ -133,24 +135,70 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
         }
         
         console.log("messageToSend= "+messageToSend);
-
-        var channelName = 'notifications';
-        const notificationChannel = newMember.guild.channels.find('name', channelName)
-
-        //Clear previous messages //https://stackoverflow.com/questions/41574971/how-does-bulkdelete-work
-        async function clear() {
-            const fetched = await notificationChannel.fetchMessages({limit: 99});
-            console.log("fetched="+fetched);
-            notificationChannel.bulkDelete(fetched);
-            console.log("cleared notificationChannel");
-        }
-        clear();
-
-        notificationChannel.send(messageToSend)
-
+        var notificationChannel = getChannelByMemberAndChannelName(newMember, 'notifications');
+        clearMessagesInChannel(notificationChannel);
+        notificationChannel.send(messageToSend);
+        
     } else if(newUserChannel === undefined){
         //User leaves a voice channel
         console.log("A user left a voice channel!");
+
+        var membersInChannels = []; 
+        var numberOfMembersInVoiceChannels = 0;
+        
+        //Use for test
+        //membersInChannels.push("Test Testsson");
+        //numberOfMembersInVoiceChannels++;        
+
+        for (const [channelID, channel] of getAllVoiceChannels(newMember)) {
+            for (const [memberID, member] of channel.members) {
+                if(member.user.username != 'Groovy'){
+                    if(member.selfMute){
+                        console.log("Muted User="+member.user.username);
+                    }else{
+                        console.log("Not Muted User="+member.user.username);
+                        membersInChannels.push(member.user.username);
+                        numberOfMembersInVoiceChannels++;
+                    }
+                }else{
+                    console.log("Groovy is a bot, ignore.");
+                }
+            }
+        }
+
+        console.log("number of users in voice channels= "+numberOfMembersInVoiceChannels);
+
+
+        var messageToSend = "A user left a voice channel! Unmuted users in channels ("+numberOfMembersInVoiceChannels+")";
+        
+        console.log("number of users in voice channels= "+numberOfMembersInVoiceChannels);
+        var numTimesInLoop = 0;
+
+        if(numberOfMembersInVoiceChannels == 0){
+            messageToSend += '. Boyzone is silent';
+        }else{
+            messageToSend += ' = ';
+        }
+        
+        for(const userName of membersInChannels){
+            numTimesInLoop++;
+            console.log("user in channel= "+userName);
+
+            if((numTimesInLoop == numberOfMembersInVoiceChannels) && (numberOfMembersInVoiceChannels != 1)){
+                messageToSend += ' and ';
+            }else if(numTimesInLoop != 1){
+                messageToSend += ', ';
+            }
+            messageToSend += userName;
+        }
+        messageToSend += '.';
+        
+        console.log("messageToSend= "+messageToSend);
+        var notificationChannel = getChannelByMemberAndChannelName(newMember, 'notifications');
+        clearMessagesInChannel(notificationChannel);
+        notificationChannel.send(messageToSend);
+        
+
     }
 
 })
@@ -181,4 +229,19 @@ function getCustomEmoji(message, userName){
 //Returns emoji based on input emojiName
 function getCustomEmojiBasedOnEmojiName(message, emojiName){
     return message.guild.emojis.find(emoji => emoji.name === emojiName);
+}
+
+//Returns all voice channels based on input member
+function getAllVoiceChannels(newMember){
+    return newMember.guild.channels.filter(channel => channel.type === 'voice');
+}
+
+//Clear previous messages //https://stackoverflow.com/questions/41574971/how-does-bulkdelete-work
+async function clearMessagesInChannel(channel) {
+    const fetched = await channel.fetchMessages({limit: 99});
+    channel.bulkDelete(fetched);
+}
+
+function getChannelByMemberAndChannelName(member, channelName){
+    return member.guild.channels.find('name', channelName);
 }
