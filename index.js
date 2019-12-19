@@ -12,6 +12,7 @@ const snekfetch = require('snekfetch');
 Useful Links:
     Youtube Guide: https://www.youtube.com/watch?v=X_qg0Ut9nU8
     Discord Bot Commands: https://gist.github.com/koad/316b265a91d933fd1b62dddfcc3ff584
+    Official Discord.js docs: https://readthedocs.org/projects/discordjs/downloads/pdf/latest/
 */
 
 //Users
@@ -89,116 +90,63 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
         //User joins a voice channel
         console.log("A user joined a voice channel!");
 
-        var membersInChannels = []; 
-        var numberOfMembersInVoiceChannels = 0;
+        var membersInChannels = getAllNonMutedUsersInVoiceChannels(newMember);
+        var numberOfMembersInVoiceChannels = membersInChannels.length;
+        var messageToSend = "A user joined a voice channel! Unmuted users in channels ("+numberOfMembersInVoiceChannels+") = ";        
+        messageToSend += getUsersInChannelString(membersInChannels, numberOfMembersInVoiceChannels);
+        messageToSend += (numberOfMembersInVoiceChannels == 5) ? ' TIME FOR CSGO!!??' : '';
         
-        //Use for test
-        //membersInChannels.push("Test Testsson");
-        //numberOfMembersInVoiceChannels++;        
-
-        for (const [channelID, channel] of getAllVoiceChannels(newMember)) {
-            for (const [memberID, member] of channel.members) {
-                if(member.user.username != 'Groovy'){
-                    if(member.selfMute){
-                        console.log("Muted User="+member.user.username);
-                    }else{
-                        console.log("Not Muted User="+member.user.username);
-                        membersInChannels.push(member.user.username);
-                        numberOfMembersInVoiceChannels++;
-                    }
-                }else{
-                    console.log("Groovy is a bot, ignore.");
-                }
-            }
-        }
-
-        var messageToSend = "A user joined a voice channel! Unmuted users in channels ("+numberOfMembersInVoiceChannels+") = ";
-
-        console.log("number of users in voice channels= "+numberOfMembersInVoiceChannels);
-
-        var numTimesInLoop = 0;
-        for(const userName of membersInChannels){
-            numTimesInLoop++;
-            console.log("user in channel= "+userName);
-
-            if((numTimesInLoop == numberOfMembersInVoiceChannels) && (numberOfMembersInVoiceChannels != 1)){
-                messageToSend += ' and ';
-            }else if(numTimesInLoop != 1){
-                messageToSend += ', ';
-            }
-            messageToSend += userName;
-        }
-        messageToSend += '.';
-
-        if(numberOfMembersInVoiceChannels == 5){
-            messageToSend += ' TIME FOR CSGO!!??';
-        }
-        
-        console.log("messageToSend= "+messageToSend);
         var notificationChannel = getChannelByMemberAndChannelName(newMember, 'notifications');
         clearMessagesInChannel(notificationChannel);
+        
+        console.log("messageToSend= "+messageToSend);
         notificationChannel.send(messageToSend);
         
     } else if(newUserChannel === undefined){
         //User leaves a voice channel
-        console.log("A user left a voice channel!");
-
-        var membersInChannels = []; 
-        var numberOfMembersInVoiceChannels = 0;
+        console.log("A user left a voice channel.");
         
-        //Use for test
-        //membersInChannels.push("Test Testsson");
-        //numberOfMembersInVoiceChannels++;        
-
-        for (const [channelID, channel] of getAllVoiceChannels(newMember)) {
-            for (const [memberID, member] of channel.members) {
-                if(member.user.username != 'Groovy'){
-                    if(member.selfMute){
-                        console.log("Muted User="+member.user.username);
-                    }else{
-                        console.log("Not Muted User="+member.user.username);
-                        membersInChannels.push(member.user.username);
-                        numberOfMembersInVoiceChannels++;
-                    }
-                }else{
-                    console.log("Groovy is a bot, ignore.");
-                }
-            }
-        }
-
-        console.log("number of users in voice channels= "+numberOfMembersInVoiceChannels);
-
-
+        var membersInChannels = getAllNonMutedUsersInVoiceChannels(newMember);
+        var numberOfMembersInVoiceChannels = membersInChannels.length;
         var messageToSend = "A user left a voice channel! Unmuted users in channels ("+numberOfMembersInVoiceChannels+")";
+        messageToSend += (numberOfMembersInVoiceChannels == 0) ? '. Boyzone is silent' : ' = ';
+        messageToSend += getUsersInChannelString(membersInChannels, numberOfMembersInVoiceChannels);
         
-        console.log("number of users in voice channels= "+numberOfMembersInVoiceChannels);
-        var numTimesInLoop = 0;
-
-        if(numberOfMembersInVoiceChannels == 0){
-            messageToSend += '. Boyzone is silent';
-        }else{
-            messageToSend += ' = ';
-        }
-        
-        for(const userName of membersInChannels){
-            numTimesInLoop++;
-            console.log("user in channel= "+userName);
-
-            if((numTimesInLoop == numberOfMembersInVoiceChannels) && (numberOfMembersInVoiceChannels != 1)){
-                messageToSend += ' and ';
-            }else if(numTimesInLoop != 1){
-                messageToSend += ', ';
-            }
-            messageToSend += userName;
-        }
-        messageToSend += '.';
-        
-        console.log("messageToSend= "+messageToSend);
         var notificationChannel = getChannelByMemberAndChannelName(newMember, 'notifications');
         clearMessagesInChannel(notificationChannel);
-        notificationChannel.send(messageToSend);
-        
 
+        console.log("messageToSend= "+messageToSend);
+        notificationChannel.send(messageToSend);
+
+    } else if(oldUserChannel !== undefined && newUserChannel !== undefined){
+        if(newMember.selfMute === true){
+            console.log("User muted");
+            var membersInChannels = getAllNonMutedUsersInVoiceChannels(newMember);
+            var numberOfMembersInVoiceChannels = membersInChannels.length;
+            var messageToSend = "A user muted himself. Unmuted users in channels ("+numberOfMembersInVoiceChannels+")";
+            messageToSend += (numberOfMembersInVoiceChannels == 0) ? '. Boyzone is silent' : ' = ';
+            messageToSend += getUsersInChannelString(membersInChannels, numberOfMembersInVoiceChannels);
+
+            var notificationChannel = getChannelByMemberAndChannelName(newMember, 'notifications');
+            clearMessagesInChannel(notificationChannel);
+    
+            console.log("messageToSend= "+messageToSend);
+            notificationChannel.send(messageToSend);
+
+        }else if(newMember.selfMute === false){
+            console.log("User unmuted");
+            var membersInChannels = getAllNonMutedUsersInVoiceChannels(newMember);
+            var numberOfMembersInVoiceChannels = membersInChannels.length;
+            var messageToSend = "A user unmuted himself! Unmuted users in channels ("+numberOfMembersInVoiceChannels+") = ";
+            messageToSend += (numberOfMembersInVoiceChannels == 5) ? ' TIME FOR CSGO!!??' : '';
+            messageToSend += getUsersInChannelString(membersInChannels, numberOfMembersInVoiceChannels);
+
+            var notificationChannel = getChannelByMemberAndChannelName(newMember, 'notifications');
+            clearMessagesInChannel(notificationChannel);
+    
+            console.log("messageToSend= "+messageToSend);
+            notificationChannel.send(messageToSend);
+        }
     }
 
 })
@@ -244,4 +192,37 @@ async function clearMessagesInChannel(channel) {
 
 function getChannelByMemberAndChannelName(member, channelName){
     return member.guild.channels.find('name', channelName);
+}
+
+function getUsersInChannelString(membersInChannels, numberOfMembersInVoiceChannels){
+    var numTimesInLoop = 0;
+    var messageToReturn = "";
+    for(const userName of membersInChannels){
+        numTimesInLoop++;
+        console.log("user in channel= "+userName);
+
+        if((numTimesInLoop == numberOfMembersInVoiceChannels) && (numberOfMembersInVoiceChannels != 1)){
+            messageToReturn += ' and ';
+        }else if(numTimesInLoop != 1){
+            messageToReturn += ', ';
+        }
+        messageToReturn += userName;
+    }
+    messageToReturn += '.';
+    
+    return messageToReturn;
+}
+
+function getAllNonMutedUsersInVoiceChannels(newMember){
+    var membersInChannelsToReturn = []; 
+    for (const [channelID, channel] of getAllVoiceChannels(newMember)) {
+        for (const [memberID, member] of channel.members) {
+            if(member.user.username != 'Groovy'){
+                if(!member.selfMute){
+                    membersInChannelsToReturn.push(member.user.username);
+                }
+            }
+        }
+    }
+    return membersInChannelsToReturn;
 }
