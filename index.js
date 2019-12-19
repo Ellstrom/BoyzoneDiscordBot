@@ -40,16 +40,17 @@ bot.on('message', message=>{
 
     //Retreives the username of the author of the message
     var userName = message.author.username;
+    var displayName = message.member.displayName; 
 
     //Logs the userName for debugging
-    console.log("userName="+userName);   
+    console.log("displayName="+displayName);   
 
     if(message.content === "HELLO" ){
         //Reacts to the message written
         message.react(getCustomEmoji(message, userName_ellstrom44));
 
         //Replies to the message written
-        message.reply('HELLO '+userName+' '+getCustomEmoji(message, userName));
+        message.reply('HELLO '+displayName+' '+getCustomEmoji(message, userName));
     } else if(message.content === "meme me"){
         message.react(getCustomEmojiBasedOnEmojiName(message, 'ck_Genius'));
         message.reply(getCustomEmoji(message, '5253_BonesDancer') + getCustomEmoji(message, '5253_BonesDancer')+ getCustomEmoji(message, '5253_BonesDancer'));
@@ -197,16 +198,16 @@ function getChannelByMemberAndChannelName(member, channelName){
 function getUsersInChannelString(membersInChannels, numberOfMembersInVoiceChannels){
     var numTimesInLoop = 0;
     var messageToReturn = "";
-    for(const userName of membersInChannels){
+    for(const displayName of membersInChannels){
         numTimesInLoop++;
-        console.log("user in channel= "+userName);
+        console.log("user in channel= "+displayName);
 
         if((numTimesInLoop == numberOfMembersInVoiceChannels) && (numberOfMembersInVoiceChannels != 1)){
             messageToReturn += ' and ';
         }else if(numTimesInLoop != 1){
             messageToReturn += ', ';
         }
-        messageToReturn += userName;
+        messageToReturn += displayName;
     }
     messageToReturn += '.';
     
@@ -219,7 +220,7 @@ function getAllNonMutedUsersInVoiceChannels(newMember){
         for (const [memberID, member] of channel.members) {
             if(member.user.username != 'Groovy'){
                 if(!member.selfMute){
-                    membersInChannelsToReturn.push(member.user.username);
+                    membersInChannelsToReturn.push(member.displayName);
                 }
             }
         }
