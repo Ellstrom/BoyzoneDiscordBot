@@ -59,7 +59,7 @@ bot.on('message', message=>{
             try {
                 const { body } = await snekfetch
                     .get('https://www.reddit.com/r/comedyheaven+dankmemes+okbuddyretard.json?sort=top&t=week')
-                    .query({ limit: 75 });
+                    .query({ limit: 20 });
                 const allowed = message.channel.nsfw ? body.data.children : body.data.children.filter(post => !post.data.over_18);
                 
                 if (!allowed.length) return message.channel.send('It seems we are out of fresh memes!, Try again later.');
