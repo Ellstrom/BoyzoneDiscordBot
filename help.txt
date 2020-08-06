@@ -2,6 +2,7 @@ run this command:
 npm install
 
 get the file token.txt and put in same directory as where BoyzoneDiscordBot is.
+Alternatively, go find the token at https://discord.com/developers/applications/654769235679117333/bot
 So file structure example:
 DiscordBot
 ----BoyzoneDiscordBot
@@ -10,3 +11,11 @@ DiscordBot
 then try 
 node .
 
+
+
+# BoyzoneDiscordBot
+To start app indefinetely, run
+forever start index.js
+
+To stop it, run
+forver stopall

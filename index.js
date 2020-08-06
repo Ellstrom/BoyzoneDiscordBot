@@ -24,6 +24,9 @@ const userName_huto29 = 'huto29';
 const userName_Lazy_Shyguy = 'Lazy_Shyguy';
 const userName_Fabars = 'Fabars';
 
+//Excluded channels for notifications
+const excludedChannelTarkov = 'Tarkov';
+
 console.log("token="+token);
 
 //Login the bot
@@ -87,54 +90,29 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
     var oldUserChannel = oldMember.voiceChannel;
     var newUserChannel = newMember.voiceChannel;
 
-    if(oldUserChannel === undefined && newUserChannel !== undefined) {
+    if(oldUserChannel === undefined && newUserChannel !== undefined && newUserChannel.name !== excludedChannelTarkov) {
         //User joins a voice channel
-        console.log("A user joined a voice channel!");
-
-        var membersInChannels = getAllNonMutedUsersInVoiceChannels(newMember);
-        var numberOfMembersInVoiceChannels = membersInChannels.length;
-        var messageToSend = "A user joined a voice channel! Unmuted users in channels ("+numberOfMembersInVoiceChannels+") = ";        
-        messageToSend += getUsersInChannelString(membersInChannels, numberOfMembersInVoiceChannels);
-        messageToSend += (numberOfMembersInVoiceChannels == 5) ? ' TIME FOR CSGO!!??' : '';
-        
-        var notificationChannel = getChannelByMemberAndChannelName(newMember, 'notifications');
-        clearMessagesInChannel(notificationChannel);
-        
-        console.log("messageToSend= "+messageToSend);
-        notificationChannel.send(messageToSend);
-        
-    } else if(newUserChannel === undefined){
+        userJoinedDiscord(newMember);
+    } else if(newUserChannel === undefined && oldUserChannel.name !== excludedChannelTarkov){
         //User leaves a voice channel
-        console.log("A user left a voice channel.");
-        
-        var membersInChannels = getAllNonMutedUsersInVoiceChannels(newMember);
-        var numberOfMembersInVoiceChannels = membersInChannels.length;
-        var messageToSend = "A user left a voice channel! Unmuted users in channels ("+numberOfMembersInVoiceChannels+")";
-        messageToSend += (numberOfMembersInVoiceChannels == 0) ? '. Boyzone is silent' : ' = ';
-        messageToSend += getUsersInChannelString(membersInChannels, numberOfMembersInVoiceChannels);
-        
-        var notificationChannel = getChannelByMemberAndChannelName(newMember, 'notifications');
-        clearMessagesInChannel(notificationChannel);
-
-        console.log("messageToSend= "+messageToSend);
-        notificationChannel.send(messageToSend);
-
+        userLeftDiscord(newMember);
     } else if(oldUserChannel !== undefined && newUserChannel !== undefined){
-        if(newMember.selfMute === true){
+        if(oldMember.selfMute === false && newMember.selfMute === true  && newUserChannel.name !== excludedChannelTarkov){
             console.log("User muted");
             var membersInChannels = getAllNonMutedUsersInVoiceChannels(newMember);
             var numberOfMembersInVoiceChannels = membersInChannels.length;
             var messageToSend = "A user muted himself. Unmuted users in channels ("+numberOfMembersInVoiceChannels+")";
+
             messageToSend += (numberOfMembersInVoiceChannels == 0) ? '. Boyzone is silent' : ' = ';
             messageToSend += getUsersInChannelString(membersInChannels, numberOfMembersInVoiceChannels);
 
             var notificationChannel = getChannelByMemberAndChannelName(newMember, 'notifications');
             clearMessagesInChannel(notificationChannel);
-    
+
             console.log("messageToSend= "+messageToSend);
             notificationChannel.send(messageToSend);
 
-        }else if(newMember.selfMute === false){
+        }else if(oldMember.selfMute === true && newMember.selfMute === false  && newUserChannel.name !== excludedChannelTarkov){
             console.log("User unmuted");
             var membersInChannels = getAllNonMutedUsersInVoiceChannels(newMember);
             var numberOfMembersInVoiceChannels = membersInChannels.length;
@@ -144,13 +122,53 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
 
             var notificationChannel = getChannelByMemberAndChannelName(newMember, 'notifications');
             clearMessagesInChannel(notificationChannel);
-    
+
             console.log("messageToSend= "+messageToSend);
             notificationChannel.send(messageToSend);
+        }else{
+            if(newUserChannel.name === excludedChannelTarkov){
+                //User went to excluded channel
+                userLeftDiscord(newMember);
+            }else if(oldUserChannel.name === excludedChannelTarkov){
+                //User went from excluded channel to non-excluded channel
+                userJoinedDiscord(newMember)
+            }
         }
     }
 
 })
+
+function userJoinedDiscord(newMember){
+    console.log("A user joined a voice channel!");
+
+    var membersInChannels = getAllNonMutedUsersInVoiceChannels(newMember);
+    var numberOfMembersInVoiceChannels = membersInChannels.length;
+    var messageToSend = "A user joined a voice channel! Unmuted users in channels ("+numberOfMembersInVoiceChannels+") = ";
+    messageToSend += getUsersInChannelString(membersInChannels, numberOfMembersInVoiceChannels);
+    messageToSend += (numberOfMembersInVoiceChannels == 5) ? ' TIME FOR CSGO!!??' : '';
+
+    var notificationChannel = getChannelByMemberAndChannelName(newMember, 'notifications');
+    clearMessagesInChannel(notificationChannel);
+
+    console.log("messageToSend= "+messageToSend);
+    notificationChannel.send(messageToSend);
+}
+
+function userLeftDiscord(newMember){
+    console.log("A user left a voice channel.");
+
+    var membersInChannels = getAllNonMutedUsersInVoiceChannels(newMember);
+    var numberOfMembersInVoiceChannels = membersInChannels.length;
+    var messageToSend = "A user left a voice channel! Unmuted users in channels ("+numberOfMembersInVoiceChannels+")";
+    messageToSend += (numberOfMembersInVoiceChannels == 0) ? '. Boyzone is silent' : ' = ';
+    messageToSend += getUsersInChannelString(membersInChannels, numberOfMembersInVoiceChannels);
+
+    var notificationChannel = getChannelByMemberAndChannelName(newMember, 'notifications');
+    clearMessagesInChannel(notificationChannel);
+
+    console.log("messageToSend= "+messageToSend);
+    notificationChannel.send(messageToSend);
+}
 
 //Returns emoji based on input userName
 function getCustomEmoji(message, userName){
@@ -219,7 +237,8 @@ function getAllNonMutedUsersInVoiceChannels(newMember){
     for (const [channelID, channel] of getAllVoiceChannels(newMember)) {
         for (const [memberID, member] of channel.members) {
             if(member.user.username != 'Groovy'){
-                if(!member.selfMute){
+                //Exclude muted users and in excluded channel.
+                if(!member.selfMute && channel.name !== excludedChannelTarkov){
                     membersInChannelsToReturn.push(member.displayName);
                 }
             }
