@@ -5,8 +5,10 @@ const bot = new Discord.Client();
 // For reading .txt file code block
 var fs = require("fs");
 const token = fs.readFileSync("./../token.txt").toString();
+const shellytoken = fs.readFileSync("./../shellytoken.txt").toString();
 
 const snekfetch = require('snekfetch');
+const axios = require('axios');
 
 /* 
 Useful Links:
@@ -40,13 +42,15 @@ bot.on('ready', () =>{
 //If a message is written
 bot.on('message', message=>{
     console.log("-------------------------------");
+    console.log("bot.on.message=");
 
     //Retreives the username of the author of the message
     var userName = message.author.username;
     var displayName = message.member.displayName; 
 
     //Logs the userName for debugging
-    console.log("displayName="+displayName);   
+    console.log("displayName="+displayName);
+    //toggleShellyDevice("on"); //TODO - flytta
 
     if(message.content === "HELLO" ){
         //Reacts to the message written
@@ -86,6 +90,7 @@ bot.on('message', message=>{
 })
 
 bot.on('voiceStateUpdate', (oldMember, newMember) =>{
+    console.log("bot.on.voiceStateUpdate=");
     console.log("-------------------------------");
     var oldUserChannel = oldMember.voiceChannel;
     var newUserChannel = newMember.voiceChannel;
@@ -112,6 +117,9 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
             console.log("messageToSend= "+messageToSend);
             notificationChannel.send(messageToSend);
 
+            if (numberOfMembersInVoiceChannels === 0) {
+                toggleShellyDevice("off");
+            }
         }else if(oldMember.selfMute === true && newMember.selfMute === false  && newUserChannel.name !== excludedChannelTarkov){
             console.log("User unmuted");
             var membersInChannels = getAllNonMutedUsersInVoiceChannels(newMember);
@@ -125,6 +133,8 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
 
             console.log("messageToSend= "+messageToSend);
             notificationChannel.send(messageToSend);
+
+            toggleShellyDevice("on");
         }else{
             if(newUserChannel.name === excludedChannelTarkov){
                 //User went to excluded channel
@@ -152,6 +162,8 @@ function userJoinedDiscord(newMember){
 
     console.log("messageToSend= "+messageToSend);
     notificationChannel.send(messageToSend);
+
+    toggleShellyDevice("on");
 }
 
 function userLeftDiscord(newMember){
@@ -168,6 +180,10 @@ function userLeftDiscord(newMember){
 
     console.log("messageToSend= "+messageToSend);
     notificationChannel.send(messageToSend);
+
+    if (numberOfMembersInVoiceChannels === 0) {
+        toggleShellyDevice("off");
+    }
 }
 
 //Returns emoji based on input userName
@@ -245,4 +261,29 @@ function getAllNonMutedUsersInVoiceChannels(newMember){
         }
     }
     return membersInChannelsToReturn;
+}
+
+function toggleShellyDevice(turn) {
+    const HEADER = {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        }
+    }
+    const DATA = {
+        auth_key: shellytoken,
+        id: '577eb5',
+        channel: 0,
+        turn: turn
+    }
+    axios
+        .post('https://shelly-53-eu.shelly.cloud/device/relay/control', DATA, HEADER)
+        .then((response) => {
+            if (response.status === 201) {
+                console.log('Req body:', response.data)
+                console.log('Req header :', response.headers)
+            }
+        })
+        .catch((e) => {
+            console.error(e)
+        })
 }
