@@ -5,7 +5,7 @@ const bot = new Discord.Client();
 // For reading .txt file code block
 var fs = require("fs");
 const token = fs.readFileSync("./../token.txt").toString();
-const shellytoken = fs.readFileSync("./../shellytoken.txt").toString();
+const shellytoken = fs.readFileSync("./../shellytoken.txt").toString().replace(/[^a-zA-Z0-9 ]/g, "");
 
 const snekfetch = require('snekfetch');
 const axios = require('axios');
@@ -50,7 +50,6 @@ bot.on('message', message=>{
 
     //Logs the userName for debugging
     console.log("displayName="+displayName);
-    //toggleShellyDevice("on"); //TODO - flytta
 
     if(message.content === "HELLO" ){
         //Reacts to the message written
@@ -287,3 +286,6 @@ function toggleShellyDevice(turn) {
             console.error(e)
         })
 }
+
+const findFirstDiff = (str1, str2) =>
+  str2[[...str1].findIndex((el, index) => el !== str2[index])];
