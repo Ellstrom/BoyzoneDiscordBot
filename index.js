@@ -37,6 +37,7 @@ bot.login(token);
 //If the bot is online
 bot.on('ready', () =>{
     console.log('This bot is online!');
+    const timeoutID = scheduleTask(); //Scheduled task which automatically turns of the shelly device (discord lights) at certain times.
 })
 
 //If a message is written
@@ -133,7 +134,9 @@ bot.on('voiceStateUpdate', (oldMember, newMember) =>{
             console.log("messageToSend= "+messageToSend);
             notificationChannel.send(messageToSend);
 
-            toggleShellyDevice("on");
+            if (isValidTimeToAllowLightsOn()){
+                toggleShellyDevice("on");
+            }
         }else{
             if(newUserChannel.name === excludedChannelTarkov){
                 //User went to excluded channel
@@ -162,7 +165,9 @@ function userJoinedDiscord(newMember){
     console.log("messageToSend= "+messageToSend);
     notificationChannel.send(messageToSend);
 
-    toggleShellyDevice("on");
+    if (isValidTimeToAllowLightsOn()){
+        toggleShellyDevice("on");
+    }
 }
 
 function userLeftDiscord(newMember){
@@ -285,6 +290,41 @@ function toggleShellyDevice(turn) {
         .catch((e) => {
             console.error(e)
         })
+}
+
+function scheduleTask() {
+    const date = new Date();
+    const day = date.getDay(); // 0 (Sunday) - 6 (Saturday)
+    let timeout = 0;
+
+    if (day >= 0 && day <= 4) {
+        // Sunday to Thursday
+
+        timeout = setTimeout(runTask, 21 * 60 * 60 * 1000);
+    } else if (day >= 5 && day <= 6) {
+        // Friday to Saturday
+        timeout = setTimeout(runTask, 22 * 60 * 60 * 1000);
+    }
+
+    return timeout;
+}
+
+function runTask() {
+    // code to be executed at the scheduled time
+    toggleShellyDevice("off");
+}
+
+
+function isValidTimeToAllowLightsOn() {
+    const date = new Date(); // current date and time
+    const day = date.getDay(); // 0 (Sunday) - 6 (Saturday)
+    const hour = date.getHours(); // 0 - 23
+    if (day >= 0 && day <= 4) {
+        return hour >= 8 && hour < 21;
+    } else if (day >= 5 && day <= 6) {
+        return hour >= 10 && hour < 22;
+    }
+    return false;
 }
 
 const findFirstDiff = (str1, str2) =>
