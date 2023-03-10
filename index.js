@@ -320,9 +320,9 @@ function isValidTimeToAllowLightsOn() {
     const day = date.getDay(); // 0 (Sunday) - 6 (Saturday)
     const hour = date.getHours(); // 0 - 23
     if (day >= 0 && day <= 4) {
-        return hour >= 8 && hour < 21;
+        return hour >= 10 && hour < 21;
     } else if (day >= 5 && day <= 6) {
-        return hour >= 10 && hour < 22;
+        return hour >= 10 && hour < 21;
     }
     return false;
 }
