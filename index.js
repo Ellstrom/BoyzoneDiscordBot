@@ -47,7 +47,10 @@ bot.on('message', message=>{
 
     //Retreives the username of the author of the message
     var userName = message.author.username;
-    var displayName = message.member.displayName; 
+    var displayName = "UnknownNameWtf";
+    if (message.member !== null) {
+        displayName = message.member.displayName;
+    }
 
     //Logs the userName for debugging
     console.log("displayName="+displayName);
